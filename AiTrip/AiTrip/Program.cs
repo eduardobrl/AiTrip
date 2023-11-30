@@ -20,7 +20,7 @@ builder.Services.Configure<OpenApiConfiguration>(
 builder.Services.Configure<VaultConfiguration>(
     builder.Configuration.GetSection(VaultConfiguration.Section));
 
-builder.Services.AddSingleton<IRepository<Product>, ProductRepository>();
+builder.Services.AddSingleton<IRepository<Flight>, FlightRepository>();
 builder.Services.AddSingleton<ISecretVault, AzureKeyVault>();
 
 var app = builder.Build();

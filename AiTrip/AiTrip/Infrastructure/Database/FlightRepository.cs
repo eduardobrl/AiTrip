@@ -6,13 +6,13 @@ using AiTrip.Infrastructure.Configurations;
 
 namespace AiTrip.Infrastructure.Database
 {
-    public class ProductRepository : IRepository<Product>
+    public class FlightRepository : IRepository<Flight>
     {
-        private readonly IMongoCollection<Product> _productCollection;
+        private readonly IMongoCollection<Flight> _flightCollection;
         private readonly ISecretVault _secretVault;
 
 
-        public ProductRepository(IOptions<DatabaseConfiguration> databaseConfiguration, ISecretVault secretVault)
+        public FlightRepository(IOptions<DatabaseConfiguration> databaseConfiguration, ISecretVault secretVault)
         {
             var configuration = databaseConfiguration.Value;
 
@@ -22,18 +22,18 @@ namespace AiTrip.Infrastructure.Database
            
             var client = new MongoClient(connectionString);
             var database = client.GetDatabase(configuration.DatabaseName);
-            _productCollection = database.GetCollection<Product>(configuration.CollectionName);
+            _flightCollection = database.GetCollection<Flight>(configuration.CollectionName);
 
         }
 
-        public async Task<List<Product>> GetAsync()
+        public async Task<List<Flight>> GetAsync()
         {
-            return await _productCollection.Find(_ => true).ToListAsync();
+            return await _flightCollection.Find(_ => true).ToListAsync();
         }
 
-        public async Task<Product?> GetAsync(int id)
+        public async Task<Flight?> GetAsync(int id)
         {
-            return await _productCollection.Find(x => x.ProductId == id).FirstOrDefaultAsync();
+            return await _flightCollection.Find(x => x.FlightId == id).FirstOrDefaultAsync();
         }
 
 

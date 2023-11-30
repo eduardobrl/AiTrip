@@ -1,7 +1,7 @@
 ﻿@page "/"
 @using AiTrip.Domain.Interfaces
 @using AiTrip.Domain.Entities
-@inject IRepository<Product> _repository
+@inject IRepository<Flight> _repository
 
 <PageTitle>Home</PageTitle>
 
@@ -11,10 +11,10 @@
 		{
 			<div class="col">
 				<div class="card" style="width: 18rem;">
-					<img src=@product.ProductImage class="card-img-top" alt="...">
+					<img src=@product.FlightImage class="card-img-top" alt="...">
 					<div class="card-body">
-						<h5 class="card-title">@product.ProductName</h5>
-						<p class="card-text">@product.ProductDescription</p>
+						<h5 class="card-title">@product.FlightName</h5>
+						<p class="card-text">@product.FlightDescription</p>
 						<a href="#" class="btn btn-primary">Go somewhere</a>
 					</div>
 				</div>
@@ -29,7 +29,7 @@
 
 @code
 {
-	public List<Product> Products { get; set; }
+	public List<Flight> Products { get; set; }
 
 	protected override async Task OnInitializedAsync()
 	{
