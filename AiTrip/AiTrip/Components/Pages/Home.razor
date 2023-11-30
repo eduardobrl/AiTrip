@@ -1,0 +1,38 @@
+﻿@page "/"
+@using AiTrip.Domain.Interfaces
+@using AiTrip.Domain.Entities
+@inject IRepository<Product> _repository
+
+<PageTitle>Home</PageTitle>
+
+<div class="container text-center">
+	<div class="row row-cols-2 row-cols-lg-5 g-2 g-lg-3">
+		@foreach (var product in Products)
+		{
+			<div class="col">
+				<div class="card" style="width: 18rem;">
+					<img src=@product.ProductImage class="card-img-top" alt="...">
+					<div class="card-body">
+						<h5 class="card-title">@product.ProductName</h5>
+						<p class="card-text">@product.ProductDescription</p>
+						<a href="#" class="btn btn-primary">Go somewhere</a>
+					</div>
+				</div>
+			</div>
+		}
+
+
+
+	</div>
+</div>
+
+
+@code
+{
+	public List<Product> Products { get; set; }
+
+	protected override async Task OnInitializedAsync()
+	{
+		Products = await _repository.GetAsync();
+	}
+}
