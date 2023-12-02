@@ -4,8 +4,10 @@
 	{
 
 		public const string Section = "OpenAi";
-		public string ProxyUrl { get; set; }
-        public string TokenSecretName { get; set; }
-		public string EmbeddingDeployment { get; set; }
+		public string ProxyUrl { get; set; } = string.Empty;
+        public string TokenSecretName { get; set; } = string.Empty;
+		public string EmbeddingDeployment { get; set; } = string.Empty;
+		public string ChatCompletionDeployment { get; set; } = string.Empty;
+		public int MaxTokens { get; set; } = 2048;
 	}
 }

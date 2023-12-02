@@ -1,0 +1,131 @@
+﻿@page "/admin"
+@using AiTrip.Domain.Entities
+@using AiTrip.Domain.Interfaces
+@using MongoDB.Bson
+@using System.Text.Json
+@inject IOpenAiService OpenAiService
+@inject IRepository<Flight> Repository;
+
+@rendermode InteractiveServer
+
+<h3>Add a new flight</h3>
+
+<EditForm Model="@Model" OnSubmit="@HandleValidSubmit">
+	
+	<div class="form-group m-3">
+		<label for="flight-destiny">From:</label>
+		<InputText class="form-control" id="flight-origin" @bind-Value="@Model!.FlightOrigin" disabled></InputText>
+	</div>
+
+	<div class="form-group m-3">
+		<label for="flight-destiny">To:</label>
+		<InputText class="form-control" id="flight-destiny" @bind-Value="@Model!.FlightDestiny" @onfocusout="@OnFocusOut"></InputText>
+	</div>
+
+
+	<div class="form-group m-3">
+		<label for="flight-description">Description:</label>
+		<InputTextArea class="form-control" id="flight-description" @bind-Value="@Model!.FlightDescription" disabled="@ThinkingAboutDescription"></InputTextArea>
+	</div>
+
+	<div class="form-group m-3">
+		<label for="flight-image">Image:</label>
+		<InputFile class="form-control" id="flight-image" @bind-Value="@Model!.FlightImage" OnChange="@OnInputFileChange"></InputFile>
+	</div>
+	
+	@if (!string.IsNullOrEmpty(Model.FlightImage))
+	{
+		<img alt="image select by user" class="img-fluid" src="@Model!.FlightImage" />
+	}
+
+	<div class="form-group m-3">
+		<label for="flight-complete">Price:</label>
+		<InputNumber class="form-control" id="flight-price" @bind-Value="@Model!.FlightPrice"></InputNumber>
+	</div>
+
+	<div class="form-group m-3">
+		<label for="flight-complete">Current Price:</label>
+		<InputNumber class="form-control" id="flight-complete" @bind-Value="@Model!.FlightCurrentPrice"></InputNumber>
+	</div>
+
+
+	<div class="form-group">
+		<button type="submit" class="btn btn-primary" disabled="@Disabled">Submit</button>
+	</div>
+</EditForm>
+
+@code {
+
+	[SupplyParameterFromForm]
+	public Flight Model { get; set; } = new Flight();
+
+	public string ImagePath { get; set; }
+	public bool Disabled { get; set; }
+	public bool ThinkingAboutDescription { get; set; }
+
+	protected override async Task OnInitializedAsync()
+	{
+		Model.FlightOrigin = "New York";
+	}
+	
+
+	private async Task HandleValidSubmit()
+	{
+		Disabled = true;
+		Model.Id = ObjectId.GenerateNewId().ToString() ?? string.Empty;
+
+		var modelEmbeddingFields = new
+		{
+			FlightOrigin = Model.FlightOrigin,
+			FlightDestiny = Model.FlightDestiny,
+			FlightDescription = Model.FlightDescription,
+			FlightPrice = Model.FlightCurrentPrice,
+			FlightCurrentPrice = Model.FlightCurrentPrice
+		};
+
+		using var stream = new MemoryStream();
+		await JsonSerializer.SerializeAsync(stream, modelEmbeddingFields);
+		using var reader = new StreamReader(stream);
+		var json = await reader.ReadToEndAsync();
+
+		var embeddings = await OpenAiService.GetEmbeddingsAsync(json);
+		await Repository.AddAsync(Model, embeddings);
+		Disabled = false;
+	}
+
+	private async Task OnFocusOut()
+	{
+		if (string.IsNullOrEmpty(Model!.FlightDestiny))
+		{
+			return;
+		}
+
+
+		if (!string.IsNullOrEmpty(Model!.FlightDescription))
+		{
+			return;
+		}
+
+		ThinkingAboutDescription = true;
+		Model!.FlightDescription = "Let's see what I can say about this destination ...";
+		var description = await OpenAiService.GetDestinationCompletionAsync(Model!.FlightDestiny);
+		Model!.FlightDescription = description.Response;
+		ThinkingAboutDescription = false;
+		 
+	}
+
+	private async Task OnInputFileChange(InputFileChangeEventArgs e)
+	{
+		var file = e.File;
+		if (file != null)
+		{
+			var format = "image/png";
+			var resizedImageFile = await file.RequestImageFileAsync(format, 200, 200);
+			var buffer = new byte[resizedImageFile.Size];
+			await resizedImageFile.OpenReadStream().ReadAsync(buffer);
+			var base64Image = Convert.ToBase64String(buffer);
+			Model.FlightImage = "data:image/png;base64," + base64Image;
+		}
+	}
+
+}

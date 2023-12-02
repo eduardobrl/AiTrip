@@ -22,6 +22,12 @@ namespace AiTrip.Infrastructure.Secrets
         }
         public async Task<string?> GetSecretAsync(string key)
         {
+            var envSecret = Environment.GetEnvironmentVariable(key);
+            if (envSecret != null)
+            {
+                return envSecret;
+            }
+
             var secret = await _client.GetSecretAsync(key);
 
             if (!secret.HasValue)
@@ -34,6 +40,12 @@ namespace AiTrip.Infrastructure.Secrets
 
         public string? GetSecret(string key)
         {
+            var envSecret = Environment.GetEnvironmentVariable(key);
+            if (envSecret != null)
+            {
+                return envSecret;
+            }
+
             var secret = _client.GetSecret(key);
 
             if (!secret.HasValue)

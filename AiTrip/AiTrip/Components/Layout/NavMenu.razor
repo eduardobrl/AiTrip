@@ -1,6 +1,11 @@
-﻿
+﻿@using AiTrip.Domain.Interfaces
+
+@inject ISearchService SearchService
+@inject ILogger<NavMenu> Logger
+@rendermode InteractiveServer
+
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-	<a class="navbar-brand" href="#">SmartStore</a>
+	<a class="navbar-brand" href="#">AiTrip</a>
 	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 		<span class="navbar-toggler-icon"></span>
 	</button>
@@ -23,11 +28,21 @@
 			</NavLink>
 		</ul>
 
-		<form class="form-inline col-3 row">
-			<input class="form-control col" type="search" placeholder="Search" aria-label="Search">
-			<button class="btn btn-outline-success col" type="submit">Search</button>
-		</form>
+		<div class="form-inline col-3 row" >
+			<input @bind-value="@Search" class="form-control col" type="search" placeholder="Search" aria-label="Search">
+			<button @onclick="OnClick" class="btn btn-outline-success col" type="button">Search</button>
+		</div>
 	</div>
 </nav>
 
+@code
+{
+	public string Search { get; set; } = string.Empty;
+
+	private void OnClick()
+	{
+		SearchService.Search(Search);
+	}
+
+}
 

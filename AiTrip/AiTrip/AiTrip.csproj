@@ -8,15 +8,27 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Components\Pages\BestSeller\**" />
+    <Compile Remove="Components\Pages\DailyOffers\**" />
+    <Compile Remove="Components\Pages\Deals\**" />
     <Compile Remove="Components\Pages\NovaPasta1\**" />
     <Compile Remove="Components\Pages\NovaPasta\**" />
     <Compile Remove="NovaPasta\**" />
+    <Content Remove="Components\Pages\BestSeller\**" />
+    <Content Remove="Components\Pages\DailyOffers\**" />
+    <Content Remove="Components\Pages\Deals\**" />
     <Content Remove="Components\Pages\NovaPasta1\**" />
     <Content Remove="Components\Pages\NovaPasta\**" />
     <Content Remove="NovaPasta\**" />
+    <EmbeddedResource Remove="Components\Pages\BestSeller\**" />
+    <EmbeddedResource Remove="Components\Pages\DailyOffers\**" />
+    <EmbeddedResource Remove="Components\Pages\Deals\**" />
     <EmbeddedResource Remove="Components\Pages\NovaPasta1\**" />
     <EmbeddedResource Remove="Components\Pages\NovaPasta\**" />
     <EmbeddedResource Remove="NovaPasta\**" />
+    <None Remove="Components\Pages\BestSeller\**" />
+    <None Remove="Components\Pages\DailyOffers\**" />
+    <None Remove="Components\Pages\Deals\**" />
     <None Remove="Components\Pages\NovaPasta1\**" />
     <None Remove="Components\Pages\NovaPasta\**" />
     <None Remove="NovaPasta\**" />
@@ -33,12 +45,7 @@
     <PackageReference Include="Azure.Security.KeyVault.Secrets" Version="4.5.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.0" />
     <PackageReference Include="MongoDB.Driver" Version="2.22.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Components\Pages\BestSeller\" />
-    <Folder Include="Components\Pages\DailyOffers\" />
-    <Folder Include="Components\Pages\Deals\" />
+    <PackageReference Include="System.Reactive" Version="6.0.0" />
   </ItemGroup>
 
 </Project>

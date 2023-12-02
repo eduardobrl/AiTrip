@@ -2,8 +2,10 @@ using AiTrip.Client.Pages;
 using AiTrip.Components;
 using AiTrip.Domain.Entities;
 using AiTrip.Domain.Interfaces;
+using AiTrip.Domain.States;
 using AiTrip.Infrastructure.Configurations;
 using AiTrip.Infrastructure.Database;
+using AiTrip.Infrastructure.OpenAi;
 using AiTrip.Infrastructure.Secrets;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +24,8 @@ builder.Services.Configure<VaultConfiguration>(
 
 builder.Services.AddSingleton<IRepository<Flight>, FlightRepository>();
 builder.Services.AddSingleton<ISecretVault, AzureKeyVault>();
+builder.Services.AddSingleton<ISearchService, SearchState>();
+builder.Services.AddSingleton<IOpenAiService, AzureOpenApiService>();
 
 var app = builder.Build();
 

@@ -1,38 +1,74 @@
 ﻿@page "/"
 @using AiTrip.Domain.Interfaces
 @using AiTrip.Domain.Entities
-@inject IRepository<Flight> _repository
-
+@inject IRepository<Flight> Repository
+@inject ISearchService SearchService;
+@inject ILogger<Home> Logger;
+@inject IOpenAiService OpenAiService;
+@rendermode InteractiveServer
 <PageTitle>Home</PageTitle>
 
+<span>@SearchParameter</span>
+
 <div class="container text-center">
+	<span></span>
 	<div class="row row-cols-2 row-cols-lg-5 g-2 g-lg-3">
-		@foreach (var product in Products)
+
+		@foreach (var flight in Flights)
 		{
-			<div class="col">
-				<div class="card" style="width: 18rem;">
-					<img src=@product.FlightImage class="card-img-top" alt="...">
+			<div class="col card-group">
+				<div class="card">
+					<img src=@flight.FlightImage class="card-img-top" alt="...">
 					<div class="card-body">
-						<h5 class="card-title">@product.FlightName</h5>
-						<p class="card-text">@product.FlightDescription</p>
-						<a href="#" class="btn btn-primary">Go somewhere</a>
+						<h5 class="card-title">@flight.FlightDestiny</h5>
+						<p class="card-text">@ObterDescricao(flight)</p>
+						<a href="#" class="btn btn-primary">Add to Cart</a>
 					</div>
 				</div>
 			</div>
 		}
-
-
-
 	</div>
 </div>
 
 
 @code
 {
-	public List<Flight> Products { get; set; }
+	public string Search { get; set; } = string.Empty;
+
+	public List<Flight> Flights { get; set; } = new List<Flight>();
+	public string SearchParameter { get; set; } = string.Empty;
+	private const int DescriptionMaxSize = 120;
 
 	protected override async Task OnInitializedAsync()
 	{
-		Products = await _repository.GetAsync();
+		var searchParameter = SearchService.GetSearch();
+
+		searchParameter.Subscribe(async param =>
+		{
+			SearchParameter = param;
+
+			var embeddings = await OpenAiService.GetEmbeddingsAsync(param);
+
+			Flights = await Repository.VectorSearchAsync(embeddings ?? new Embedding());
+
+
+			await InvokeAsync(() =>
+			{
+				var stateHasChanged = StateHasChanged;
+				stateHasChanged();
+			});
+
+		});
+
+		Flights = await Repository.GetAsync();
+	}
+
+	private string ObterDescricao(Flight flight)
+	{
+		if (flight.FlightDescription.Length <= DescriptionMaxSize)
+		{
+			return flight.FlightDescription;
+		}
+		return flight.FlightDescription.Substring(0,DescriptionMaxSize) + "...";
 	}
 }
