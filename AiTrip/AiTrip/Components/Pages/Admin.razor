@@ -8,51 +8,53 @@
 
 @rendermode InteractiveServer
 
-<h3>Add a new flight</h3>
+<div class="container">
+	<h3>Add a new flight</h3>
 
-<EditForm Model="@Model" OnSubmit="@HandleValidSubmit">
-	
-	<div class="form-group m-3">
-		<label for="flight-destiny">From:</label>
-		<InputText class="form-control" id="flight-origin" @bind-Value="@Model!.FlightOrigin" disabled></InputText>
-	</div>
+	<EditForm Model="@Model" OnSubmit="@HandleValidSubmit">
+		
+		<div class="form-group m-3">
+			<label for="flight-destiny">From:</label>
+			<InputText class="form-control" id="flight-origin" @bind-Value="@Model!.FlightOrigin" disabled></InputText>
+		</div>
 
-	<div class="form-group m-3">
-		<label for="flight-destiny">To:</label>
-		<InputText class="form-control" id="flight-destiny" @bind-Value="@Model!.FlightDestiny" @onfocusout="@OnFocusOut"></InputText>
-	</div>
-
-
-	<div class="form-group m-3">
-		<label for="flight-description">Description:</label>
-		<InputTextArea class="form-control" id="flight-description" @bind-Value="@Model!.FlightDescription" disabled="@ThinkingAboutDescription"></InputTextArea>
-	</div>
-
-	<div class="form-group m-3">
-		<label for="flight-image">Image:</label>
-		<InputFile class="form-control" id="flight-image" @bind-Value="@Model!.FlightImage" OnChange="@OnInputFileChange"></InputFile>
-	</div>
-	
-	@if (!string.IsNullOrEmpty(Model.FlightImage))
-	{
-		<img alt="image select by user" class="img-fluid" src="@Model!.FlightImage" />
-	}
-
-	<div class="form-group m-3">
-		<label for="flight-complete">Price:</label>
-		<InputNumber class="form-control" id="flight-price" @bind-Value="@Model!.FlightPrice"></InputNumber>
-	</div>
-
-	<div class="form-group m-3">
-		<label for="flight-complete">Current Price:</label>
-		<InputNumber class="form-control" id="flight-complete" @bind-Value="@Model!.FlightCurrentPrice"></InputNumber>
-	</div>
+		<div class="form-group m-3">
+			<label for="flight-destiny">To:</label>
+			<InputText class="form-control" id="flight-destiny" @bind-Value="@Model!.FlightDestiny" @onfocusout="@OnFocusOut"></InputText>
+		</div>
 
 
-	<div class="form-group">
-		<button type="submit" class="btn btn-primary" disabled="@Disabled">Submit</button>
-	</div>
-</EditForm>
+		<div class="form-group m-3">
+			<label for="flight-description">Description:</label>
+			<InputTextArea class="form-control" id="flight-description" @bind-Value="@Model!.FlightDescription" disabled="@ThinkingAboutDescription"></InputTextArea>
+		</div>
+
+		<div class="form-group m-3">
+			<label for="flight-image">Image:</label>
+			<InputFile class="form-control" id="flight-image" @bind-Value="@Model!.FlightImage" OnChange="@OnInputFileChange"></InputFile>
+		</div>
+		
+		@if (!string.IsNullOrEmpty(Model.FlightImage))
+		{
+			<img alt="image select by user" class="img-fluid" src="@Model!.FlightImage" />
+		}
+
+		<div class="form-group m-3">
+			<label for="flight-complete">Price:</label>
+			<InputNumber class="form-control" id="flight-price" @bind-Value="@Model!.FlightPrice"></InputNumber>
+		</div>
+
+		<div class="form-group m-3">
+			<label for="flight-complete">Current Price:</label>
+			<InputNumber class="form-control" id="flight-complete" @bind-Value="@Model!.FlightCurrentPrice"></InputNumber>
+		</div>
+
+
+		<div class="form-group">
+			<button type="submit" class="btn btn-primary" disabled="@Disabled">Submit</button>
+		</div>
+	</EditForm>
+</div>
 
 @code {
 

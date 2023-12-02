@@ -1,6 +1,9 @@
 ﻿@page "/"
 @using AiTrip.Domain.Interfaces
 @using AiTrip.Domain.Entities
+@using System.Text.Json.Serialization
+@using AiTrip.Domain.Formatters
+@using System.Text.Json
 @inject IRepository<Flight> Repository
 @inject ISearchService SearchService;
 @inject ILogger<Home> Logger;
@@ -9,11 +12,17 @@
 <PageTitle>Home</PageTitle>
 
 <span>@SearchParameter</span>
+@if (!string.IsNullOrEmpty(ChatResponse))
+{
+	<blockquote class="blockquote">
+		<p>@ChatResponse</p>
+	</blockquote>
+}
+
 
 <div class="container text-center">
-	<span></span>
-	<div class="row row-cols-2 row-cols-lg-5 g-2 g-lg-3">
 
+	<div class="row row-cols-2 row-cols-lg-5 g-2 g-lg-3">
 		@foreach (var flight in Flights)
 		{
 			<div class="col card-group">
@@ -22,12 +31,33 @@
 					<div class="card-body">
 						<h5 class="card-title">@flight.FlightDestiny</h5>
 						<p class="card-text">@ObterDescricao(flight)</p>
+						<div class="column">
+							<p class="card-text text-danger row-sm"><del>@CurrencyFormatter.ToString(flight.FlightPrice)</del></p>
+							<p class="card-text text-primary row-sm">@CurrencyFormatter.ToString(flight.FlightCurrentPrice)</p>
+						</div>
+
 						<a href="#" class="btn btn-primary">Add to Cart</a>
 					</div>
 				</div>
 			</div>
 		}
 	</div>
+	
+	<nav aria-label="...">
+		<ul class="pagination">
+			<li class="page-item disabled">
+				<a class="page-link" href="#" tabindex="-1">Previous</a>
+			</li>
+			<li class="page-item"><a class="page-link" href="#">1</a></li>
+			<li class="page-item active">
+				<a class="page-link" href="#">2 <span class="sr-only">(current)</span></a>
+			</li>
+			<li class="page-item"><a class="page-link" href="#">3</a></li>
+			<li class="page-item">
+				<a class="page-link" href="#">Next</a>
+			</li>
+		</ul>
+	</nav>
 </div>
 
 
@@ -38,6 +68,8 @@
 	public List<Flight> Flights { get; set; } = new List<Flight>();
 	public string SearchParameter { get; set; } = string.Empty;
 	private const int DescriptionMaxSize = 120;
+	private bool Thinking { get; set; } = false;
+	public string ChatResponse { get; set; } = string.Empty;
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -45,11 +77,31 @@
 
 		searchParameter.Subscribe(async param =>
 		{
+			Thinking = true;
 			SearchParameter = param;
 
 			var embeddings = await OpenAiService.GetEmbeddingsAsync(param);
 
 			Flights = await Repository.VectorSearchAsync(embeddings ?? new Embedding());
+			var models = Flights.Select(model => new
+			{
+				FlightOrigin = model.FlightOrigin,
+				FlightDestiny = model.FlightDestiny,
+				FlightDescription = model.FlightDescription,
+				FlightPrice = model.FlightCurrentPrice,
+				FlightCurrentPrice = model.FlightCurrentPrice
+			}).ToList();
+
+			using var stream = new MemoryStream();
+			await JsonSerializer.SerializeAsync(stream, new {Fligths = models});
+			stream.Position = 0;
+			using var reader = new StreamReader(stream);
+			var json = await reader.ReadToEndAsync();
+
+
+			var chatCompletion = await OpenAiService.GetChatCompletionAsync(param, json);
+
+			ChatResponse = chatCompletion.Response;
 
 
 			await InvokeAsync(() =>
@@ -61,6 +113,7 @@
 		});
 
 		Flights = await Repository.GetAsync();
+		Thinking = false;
 	}
 
 	private string ObterDescricao(Flight flight)

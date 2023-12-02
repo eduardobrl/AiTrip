@@ -30,6 +30,8 @@ namespace AiTrip.Infrastructure.OpenAi
                                                 - User said: 'I want to go to a place with beach'
                                                 - You can use your knowledge about the available destinations and say that the user can go to 'Rio de Janeiro' because it has nice beach
                                                     Obs: This is only one example, you don't need to use this response.
+                                                
+                                                Available destinations:
                                                         
                                                 """;
 
