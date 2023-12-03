@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AiTrip", "AiTrip\AiTrip\AiT
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AiTrip.Client", "AiTrip\AiTrip.Client\AiTrip.Client.csproj", "{9E82415A-EAAD-4B0B-8DED-16A95BEEF8C4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SetupProject", "SetupProject\SetupProject.csproj", "{A8DCB608-C78C-446F-B314-1B740CD391F4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{9E82415A-EAAD-4B0B-8DED-16A95BEEF8C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E82415A-EAAD-4B0B-8DED-16A95BEEF8C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E82415A-EAAD-4B0B-8DED-16A95BEEF8C4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8DCB608-C78C-446F-B314-1B740CD391F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8DCB608-C78C-446F-B314-1B740CD391F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8DCB608-C78C-446F-B314-1B740CD391F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8DCB608-C78C-446F-B314-1B740CD391F4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
