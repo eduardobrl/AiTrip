@@ -35,6 +35,7 @@ az login
 ```
 
 This will open a browser window for you to login to your Azure account. If the browser does not open, you can manually open it and navigate to the URL provided in the command output.
+
 3. **Set Active Subscription:** If you have multiple Azure subscriptions, set the subscription you want to use with the following command:
 
 ```
