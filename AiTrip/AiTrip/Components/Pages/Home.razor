@@ -1,84 +1,150 @@
 ﻿@page "/"
+@page "/{CurrentPage}"
 @using AiTrip.Domain.Interfaces
 @using AiTrip.Domain.Entities
 @using System.Text.Json.Serialization
 @using AiTrip.Domain.Formatters
 @using System.Text.Json
+@using AiTrip.Infrastructure.Database
 @inject IRepository<Flight> Repository
 @inject ISearchService SearchService;
 @inject ILogger<Home> Logger;
 @inject IOpenAiService OpenAiService;
+@inject NavigationManager NavigationManager
 @rendermode InteractiveServer
+@attribute [StreamRendering(true)];
+
 <PageTitle>Home</PageTitle>
 
 <span>@SearchParameter</span>
 @if (!string.IsNullOrEmpty(ChatResponse))
 {
 	<blockquote class="blockquote">
-		<p>@ChatResponse</p>
+		@foreach (var paragraph in TextFormater.GetParagraphs(ChatResponse))
+		{
+			<p>@paragraph</p>
+		}
 	</blockquote>
 }
 
+@if ( (Flights.Count == 0) || Thinking)
+{
+	<div class="d-flex justify-content-center">
+		<div class="spinner-border" role="status">
+			<span class="visually-hidden">Loading...</span>
+		</div>
+	</div>
+}
+else
+{
+	<div class="container text-center column">
 
-<div class="container text-center">
-
-	<div class="row row-cols-2 row-cols-lg-5 g-2 g-lg-3">
-		@foreach (var flight in Flights)
-		{
-			<div class="col card-group">
-				<div class="card">
-					<img src=@flight.FlightImage class="card-img-top" alt="...">
-					<div class="card-body">
-						<h5 class="card-title">@flight.FlightDestiny</h5>
-						<p class="card-text">@ObterDescricao(flight)</p>
-						<div class="column">
-							<p class="card-text text-danger row-sm"><del>@CurrencyFormatter.ToString(flight.FlightPrice)</del></p>
-							<p class="card-text text-primary row-sm">@CurrencyFormatter.ToString(flight.FlightCurrentPrice)</p>
+		<div class="row row-cols-2 row-cols-lg-5 g-2 g-lg-3">
+			@foreach (var flight in Flights)
+			{
+				<div class="col card-group">
+					<div class="card">
+						<img src=@flight.FlightImage class="card-img-top" alt="...">
+						<div class="card-body">
+							<h5 class="card-title">@flight.FlightDestiny</h5>
+							<p class="card-text">@ObterDescricao(flight)</p>
+							<div class="column">
+								<p class="card-text text-danger row-sm"><del>@CurrencyFormatter.ToString(flight.FlightPrice)</del></p>
+								<p class="card-text text-primary font-weight-bold row-sm">@CurrencyFormatter.ToString(flight.FlightCurrentPrice)</p>
+							</div>
+							
+							
+						</div>
+						<div class="card-footer">
+							<a href="/flight/@flight.Id" class="btn btn-primary">More</a>
 						</div>
 
-						<a href="#" class="btn btn-primary">Add to Cart</a>
 					</div>
 				</div>
+			}
+		</div>
+
+		@if (string.IsNullOrEmpty(ChatResponse))
+		{
+			<div class="</div>">
+	
+				<nav aria-label="...">
+					<ul class="pagination">
+
+						<li class="page-item @HasPreviousPage()">
+							<a class="page-link" href="@GetPreviousPage()" tabindex="-1">Previous</a>
+						</li>
+
+						@for (var currentPage = 1; currentPage <= FlightPagination.TotalPageCount; currentPage++)
+						{
+							if (currentPage == FlightPagination.PageNumber)
+							{
+								<li class="page-item active">
+									<a class="page-link" href="/@currentPage">@currentPage </a>
+								</li>
+							}
+							else
+							{
+								<li class="page-item">
+									<a class="page-link" href="/@currentPage">@currentPage</a>
+								</li>
+							}
+						}
+
+						<li class="page-item @HasNextPage()">
+							<a class="page-link" href="/@GetNextPage()">Next</a>
+						</li>
+					</ul>
+				</nav>
 			</div>
 		}
+
+
 	</div>
-	
-	<nav aria-label="...">
-		<ul class="pagination">
-			<li class="page-item disabled">
-				<a class="page-link" href="#" tabindex="-1">Previous</a>
-			</li>
-			<li class="page-item"><a class="page-link" href="#">1</a></li>
-			<li class="page-item active">
-				<a class="page-link" href="#">2 <span class="sr-only">(current)</span></a>
-			</li>
-			<li class="page-item"><a class="page-link" href="#">3</a></li>
-			<li class="page-item">
-				<a class="page-link" href="#">Next</a>
-			</li>
-		</ul>
-	</nav>
-</div>
+
+}
+
+
 
 
 @code
 {
 	public string Search { get; set; } = string.Empty;
-
 	public List<Flight> Flights { get; set; } = new List<Flight>();
 	public string SearchParameter { get; set; } = string.Empty;
 	private const int DescriptionMaxSize = 120;
 	private bool Thinking { get; set; } = false;
 	public string ChatResponse { get; set; } = string.Empty;
+	public Pagination<Flight> FlightPagination { get; set; } = new Pagination<Flight>();
+
+	[Parameter] public string CurrentPage { get; set; } = "1";
 
 	protected override async Task OnInitializedAsync()
 	{
+		var page = GetCurrentPage();
+
 		var searchParameter = SearchService.GetSearch();
+		FlightPagination = await Repository.GetAsync(page);
+		Flights = FlightPagination.Items;
 
 		searchParameter.Subscribe(async param =>
 		{
 			Thinking = true;
+			await InvokeAsync(() =>
+			{
+				var stateHasChanged = StateHasChanged;
+				stateHasChanged();
+			});
+
 			SearchParameter = param;
+
+			if (string.IsNullOrEmpty(SearchParameter))
+			{
+				FlightPagination = await Repository.GetAsync(page);
+				Flights = FlightPagination.Items;
+				Thinking = false;
+				return;
+			}
 
 			var embeddings = await OpenAiService.GetEmbeddingsAsync(param);
 
@@ -103,17 +169,18 @@
 
 			ChatResponse = chatCompletion.Response;
 
+			SearchService.SearchFinished().OnNext(true);
+			Thinking = false;
 
 			await InvokeAsync(() =>
 			{
 				var stateHasChanged = StateHasChanged;
 				stateHasChanged();
 			});
+			
 
 		});
 
-		Flights = await Repository.GetAsync();
-		Thinking = false;
 	}
 
 	private string ObterDescricao(Flight flight)
@@ -123,5 +190,36 @@
 			return flight.FlightDescription;
 		}
 		return flight.FlightDescription.Substring(0,DescriptionMaxSize) + "...";
+	}
+
+	private int GetNextPage()
+	{
+		return GetCurrentPage() + 1;
+	}
+
+	private string HasNextPage()
+	{
+		return GetCurrentPage() == FlightPagination.TotalPageCount ? "disabled" : "";
+	}
+
+	private int GetPreviousPage()
+	{
+		return GetCurrentPage() - 1;
+	}
+
+	private string HasPreviousPage()
+	{
+		return GetCurrentPage() <= 1 ? "disabled" : "";
+	}
+
+	private int GetCurrentPage()
+	{
+		Int32.TryParse(CurrentPage, out var page);
+		if (page < 1)
+		{
+			return 1;
+		}
+
+		return page;
 	}
 }

@@ -6,6 +6,8 @@ namespace AiTrip.Domain.States
 	public class SearchState : ISearchService
 	{
 		private Subject<string> _search = new();
+		private Subject<bool> _searchFinished = new();
+
 
 		public void Search(string search)
 		{
@@ -15,6 +17,11 @@ namespace AiTrip.Domain.States
 		public ISubject<string> GetSearch()
 		{
 			return _search;
+		}
+
+		public ISubject<bool> SearchFinished()
+		{
+			return _searchFinished;
 		}
 	}
 }

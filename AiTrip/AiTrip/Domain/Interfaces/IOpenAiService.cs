@@ -12,5 +12,8 @@ namespace AiTrip.Domain.Interfaces
 		Task<ChatCompletion> GetDestinationCompletionAsync(
 			string destination);
 
+		Task<ImageGeneration> GetDestinationImageCompletionAsync(
+			string destination);
+
 	}
 }

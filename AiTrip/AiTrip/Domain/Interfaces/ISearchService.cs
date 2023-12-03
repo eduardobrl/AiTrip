@@ -6,5 +6,6 @@ namespace AiTrip.Domain.Interfaces
 	{
 		void Search(string search);
 		ISubject<string> GetSearch();
+		ISubject<bool> SearchFinished();
 	}
 }

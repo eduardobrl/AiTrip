@@ -8,7 +8,7 @@ public class Flight
 {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
-    public string Id { get; set; } = string.Empty;
+    public ObjectId Id { get; set; }
     public string FlightId { get; set; } = string.Empty;
     public string FlightDescription { get; set; } = string.Empty;
     public string FlightImage { get; set; } = string.Empty;

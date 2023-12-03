@@ -29,16 +29,36 @@ namespace AiTrip.Infrastructure.Database
 
 		}
 
-        public async Task<List<Flight>> GetAsync()
+        public async Task<Pagination<Flight>> GetAsync(int pageNumber = 1, int pageSize = 10)
         {
-			return await _flightCollection.Find(_ => true, options:new FindOptions
+	        if (pageNumber < 1 || pageSize < 1)
+	        {
+		        pageNumber = 1; 
+		        pageSize = 10;
+	        }
+
+			var collectionTask = _flightCollection.Find(_ => true).Skip((pageNumber - 1) * pageSize)
+				.Limit(pageSize)
+				.ToListAsync();
+
+			var countTask =  _flightCollection.CountDocumentsAsync(new BsonDocument());
+
+			await Task.WhenAll(collectionTask, countTask);
+			var results = collectionTask.Result;
+			var count = (int)countTask.Result;
+
+			return new Pagination<Flight>
 			{
-				
-			}).ToListAsync();
-		}
+				Items = collectionTask.Result,
+				TotalCount = count,
+				PageNumber = pageNumber,
+				TotalPageCount = (int)Math.Ceiling((double)count / pageSize),
+				PageCount = results.Count,
+				PageSize = pageSize
+			};
+        }
 
-
-        public async Task<List<Flight>> VectorSearchAsync(Embedding embedding)
+		public async Task<List<Flight>> VectorSearchAsync(Embedding embedding)
         {
 	        var queryVector = embedding.Value ?? new float[]{};
 	        List<string> retDocs = new List<string>();
@@ -88,7 +108,9 @@ namespace AiTrip.Infrastructure.Database
 
         public async Task<Flight?> GetAsync(string id)
         {
-            return await _flightCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
+	        var objectId = new ObjectId(id);
+
+			return await _flightCollection.Find(x => x.Id == objectId).FirstOrDefaultAsync();
         }
 
 

@@ -44,7 +44,7 @@ namespace AiTrip.Infrastructure.OpenAi
                                                         
                                                 """;
 
-
+        private const string ImageGenerationPrompt = """Generate an beautiful image of the following place: """;
 
 		public AzureOpenApiService(IOptions<OpenApiConfiguration> configuration, ISecretVault secretVault)
         {
@@ -106,7 +106,7 @@ namespace AiTrip.Infrastructure.OpenAi
 			        systemMessage,
 			        userMessage
 		        },
-		        MaxTokens = _configuration.MaxTokens,
+		        MaxTokens = 512,
 		        Temperature = 0.7f,
 		        NucleusSamplingFactor = 0.95f,
 		        FrequencyPenalty = 0,
@@ -158,6 +158,26 @@ namespace AiTrip.Infrastructure.OpenAi
 		        PromptTokens = completions.Usage.PromptTokens,
 		        Response = completions.Choices[0].Message.Content,
 		        ResponseTokens = completions.Usage.CompletionTokens
+	        };
+
+        }
+
+        public async Task<ImageGeneration> GetDestinationImageCompletionAsync(
+	        string destination)
+        {
+	        Response<ImageGenerations> imageGenerations = await _client.GetImageGenerationsAsync(
+		        new ImageGenerationOptions()
+		        {
+			        Prompt = ImageGenerationPrompt + destination,
+			        Size = ImageSize.Size256x256,
+		        });
+
+	        var image = imageGenerations.Value;
+	        Uri imageUri = imageGenerations.Value.Data[0].Url;
+
+			return new ImageGeneration
+	        {
+		        Uri = imageUri
 	        };
 
         }

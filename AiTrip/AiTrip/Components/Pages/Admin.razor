@@ -5,6 +5,7 @@
 @using System.Text.Json
 @inject IOpenAiService OpenAiService
 @inject IRepository<Flight> Repository;
+@inject NavigationManager NavigationManager;
 
 @rendermode InteractiveServer
 
@@ -74,7 +75,7 @@
 	private async Task HandleValidSubmit()
 	{
 		Disabled = true;
-		Model.Id = ObjectId.GenerateNewId().ToString() ?? string.Empty;
+		Model.Id = ObjectId.GenerateNewId();
 
 		var modelEmbeddingFields = new
 		{
@@ -87,12 +88,16 @@
 
 		using var stream = new MemoryStream();
 		await JsonSerializer.SerializeAsync(stream, modelEmbeddingFields);
+		stream.Position = 0;
 		using var reader = new StreamReader(stream);
 		var json = await reader.ReadToEndAsync();
 
 		var embeddings = await OpenAiService.GetEmbeddingsAsync(json);
 		await Repository.AddAsync(Model, embeddings);
+
 		Disabled = false;
+
+		NavigationManager.NavigateTo("/");
 	}
 
 	private async Task OnFocusOut()
@@ -110,9 +115,16 @@
 
 		ThinkingAboutDescription = true;
 		Model!.FlightDescription = "Let's see what I can say about this destination ...";
-		var description = await OpenAiService.GetDestinationCompletionAsync(Model!.FlightDestiny);
-		Model!.FlightDescription = description.Response;
+		var description = OpenAiService.GetDestinationCompletionAsync(Model!.FlightDestiny);
+		var image = OpenAiService.GetDestinationImageCompletionAsync(Model!.FlightDestiny);
+
+		await Task.WhenAll(description, image);
+
+		Model!.FlightDescription = description.Result.Response;
+		Model!.FlightImage = image.Result.Uri.ToString();
+
 		ThinkingAboutDescription = false;
+
 		 
 	}
 

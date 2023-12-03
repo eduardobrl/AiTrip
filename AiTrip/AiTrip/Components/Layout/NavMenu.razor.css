@@ -1,6 +1,13 @@
 nav {
     padding: 0px 0.5rem;
+    margin: 0px 1rem;
 }
+
+nav a {
+    margin-left: 1rem;
+}
+
+
 
 input {
     margin: 1rem;

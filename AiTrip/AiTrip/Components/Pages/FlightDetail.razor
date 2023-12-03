@@ -1,5 +1,52 @@
-﻿<h3>FlightDetail</h3>
+﻿@page "/flight/{flightId}"
+@using AiTrip.Domain.Interfaces
+@using AiTrip.Domain.Entities
+@using AiTrip.Domain.Formatters
+@inject IRepository<Flight> Repository;
+@inject NavigationManager NavigationManager;
+@attribute [StreamRendering(true)];
+
+@if (Flight == null)
+{
+	<div>Loading ...</div>
+}
+else
+{
+	
+	<div class="container">
+		<h3 class="">@Flight.FlightDestiny</h3>
+		<div class="row">
+
+			<div class="col-2">
+				<div class="col">
+					<img alt="" class="img-fluid row-6" src="@Flight.FlightImage"/>
+					<div class="row">
+						<a type="submit" class="btn btn-primary  row-6" href="/">Buy</a>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-10 row">
+				@foreach (var paragraph in TextFormater.GetParagraphs(Flight.FlightDescription))
+				{
+					<p class="text-break">@paragraph</p>
+				}
+			</div>
+		</div>
+	</div>
+}
+
 
 @code {
+
+	[Parameter]
+	public string FlightId { get; set; }
+
+	public Flight? Flight { get; set; }
+
+	protected override async Task OnInitializedAsync()
+	{
+		Flight = await Repository.GetAsync(FlightId);
+	}
 
 }
