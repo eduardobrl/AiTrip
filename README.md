@@ -66,6 +66,8 @@ It's required to create an Cosmodb Database, and configure the following in the 
 
 Where ConnectionStringSecretName is a secret in your Azure Key Vault.
 
+#### Create an Index in your MongoDb Collection
+
 The project **SetupProject** gives an example of how to create an index in CosmoDb:
 
 ```
@@ -110,6 +112,7 @@ In the **appsettings.json** file configure your Open Ai settings:
 ```
 
 | Key | Value |
+| --- | ----- |
 | ProxyUrl | https://aoai.hacktogether.net |
 | TokenSecretName | The name of a token registered in Azure Key Vault or an Environment Variable |
 | EmbeddingDeployment | Name of deployment for generate embeddings |
