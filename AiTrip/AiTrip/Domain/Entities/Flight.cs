@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -8,9 +9,11 @@ public class Flight
 {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
+    [JsonIgnore]
     public ObjectId Id { get; set; }
     public string FlightId { get; set; } = string.Empty;
     public string FlightDescription { get; set; } = string.Empty;
+    [JsonIgnore]
     public string FlightImage { get; set; } = string.Empty;
     public string FlightOrigin { get; set; } = string.Empty;
     public string FlightDestiny { get; set; } = string.Empty;

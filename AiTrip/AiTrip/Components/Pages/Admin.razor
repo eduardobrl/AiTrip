@@ -77,17 +77,8 @@
 		Disabled = true;
 		Model.Id = ObjectId.GenerateNewId();
 
-		var modelEmbeddingFields = new
-		{
-			FlightOrigin = Model.FlightOrigin,
-			FlightDestiny = Model.FlightDestiny,
-			FlightDescription = Model.FlightDescription,
-			FlightPrice = Model.FlightCurrentPrice,
-			FlightCurrentPrice = Model.FlightCurrentPrice
-		};
-
 		using var stream = new MemoryStream();
-		await JsonSerializer.SerializeAsync(stream, modelEmbeddingFields);
+		await JsonSerializer.SerializeAsync(stream, Model);
 		stream.Position = 0;
 		using var reader = new StreamReader(stream);
 		var json = await reader.ReadToEndAsync();

@@ -149,17 +149,9 @@ else
 			var embeddings = await OpenAiService.GetEmbeddingsAsync(param);
 
 			Flights = await Repository.VectorSearchAsync(embeddings ?? new Embedding());
-			var models = Flights.Select(model => new
-			{
-				FlightOrigin = model.FlightOrigin,
-				FlightDestiny = model.FlightDestiny,
-				FlightDescription = model.FlightDescription,
-				FlightPrice = model.FlightCurrentPrice,
-				FlightCurrentPrice = model.FlightCurrentPrice
-			}).ToList();
 
 			using var stream = new MemoryStream();
-			await JsonSerializer.SerializeAsync(stream, new {Fligths = models});
+			await JsonSerializer.SerializeAsync(stream, new { Fligths = Flights });
 			stream.Position = 0;
 			using var reader = new StreamReader(stream);
 			var json = await reader.ReadToEndAsync();
